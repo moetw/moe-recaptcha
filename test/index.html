@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <script src="../build/moe-recaptcha.js"></script>
+</head>
+<body>
+<button id="submit" disabled>Submit</button>
+<div id="container"></div>
+<moe-recaptcha id="version2" version="2"></moe-recaptcha>
+
+<moe-recaptcha id="version3" version="3"></moe-recaptcha>
+<script>
+  const KEY_V2 = '6LcHnncUAAAAADHl2KesSFiXcrEqWKJBQudDtYKk';
+  const KEY_V3 = '6Lcsn3cUAAAAADwGIPa5M46Siqujn63tsclnpDs4';
+
+  suite('<moe-recaptcha>', function() {
+    test('basic', async function() {
+      const button = document.querySelector("#submit");
+      const container = document.querySelector("#container");
+      const moeRecaptchaV2 = document.querySelector("#version2");
+      const moeRecaptchaV3 = document.querySelector("#version3");
+      assert.instanceOf(moeRecaptchaV2, MoeRecaptcha);
+      assert.instanceOf(moeRecaptchaV3, MoeRecaptcha);
+
+      await moeRecaptchaV3.load(KEY_V3)
+      assert.equal(moeRecaptchaV3.sitekey, KEY_V3);
+      let token3 = await moeRecaptchaV3.execute('test');
+      console.log('recaptcha v3 resolved action=test', token3);
+
+      await moeRecaptchaV2.load(KEY_V2);
+      assert.equal(moeRecaptchaV2.sitekey, KEY_V2);
+
+      moeRecaptchaV2.render(container, 'invisible', 'inline');
+      assert.equal(moeRecaptchaV2.container, container);
+
+      button.removeAttribute('disabled');
+      button.addEventListener('click', async () => {
+        try {
+          const token = await moeRecaptchaV2.execute();
+          console.log('recatpcha resolved', token);
+          assert.isNotEmpty(token);
+          button.removeAttribute('disabled');
+
+          token3 = await moeRecaptchaV3.execute('test2');
+          console.log('recaptcha v3 resolved action=test2', token3);
+        } catch (err) {
+          console.error(err);
+        }
+      });
+      button.click();
+    });
+  });
+</script>
+</body>
+</html>
