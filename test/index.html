@@ -5,17 +5,18 @@
     <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
     <script src="../node_modules/wct-browser-legacy/browser.js"></script>
     <script src="../build/moe-recaptcha.js"></script>
+    <style>
+        .grecaptcha-badge {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 <button id="submit" disabled>Submit</button>
 <div id="container"></div>
-<moe-recaptcha id="version2" version="2"></moe-recaptcha>
-
-<moe-recaptcha id="version3" version="3"></moe-recaptcha>
+<moe-recaptcha id="version2" version="2" sitekey="6LcHnncUAAAAADHl2KesSFiXcrEqWKJBQudDtYKk" size="invisible" badge="inline"></moe-recaptcha>
+<moe-recaptcha id="version3" version="3" sitekey="6Lcsn3cUAAAAADwGIPa5M46Siqujn63tsclnpDs4"></moe-recaptcha>
 <script>
-  const KEY_V2 = '6LcHnncUAAAAADHl2KesSFiXcrEqWKJBQudDtYKk';
-  const KEY_V3 = '6Lcsn3cUAAAAADwGIPa5M46Siqujn63tsclnpDs4';
-
   suite('<moe-recaptcha>', function() {
     test('basic', async function() {
       const button = document.querySelector("#submit");
@@ -25,16 +26,11 @@
       assert.instanceOf(moeRecaptchaV2, MoeRecaptcha);
       assert.instanceOf(moeRecaptchaV3, MoeRecaptcha);
 
-      await moeRecaptchaV3.load(KEY_V3)
-      assert.equal(moeRecaptchaV3.sitekey, KEY_V3);
+      await moeRecaptchaV3.load()
       let token3 = await moeRecaptchaV3.execute('test');
       console.log('recaptcha v3 resolved action=test', token3);
 
-      await moeRecaptchaV2.load(KEY_V2);
-      assert.equal(moeRecaptchaV2.sitekey, KEY_V2);
-
-      moeRecaptchaV2.render(container, 'invisible', 'inline');
-      assert.equal(moeRecaptchaV2.container, container);
+      await moeRecaptchaV2.load(container);
 
       button.removeAttribute('disabled');
       button.addEventListener('click', async () => {

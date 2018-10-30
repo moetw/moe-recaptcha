@@ -25,7 +25,14 @@
   dependencies:
     "@polymer/polymer" "^3.0.0"
 
-"@polymer/polymer@^3.0.0", "@polymer/polymer@^3.1.0":
+"@polymer/lit-element@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@polymer/lit-element/-/lit-element-0.6.2.tgz#589f2fa19e84d23c1debb2c329cbab758ae30581"
+  integrity sha512-4NWvK6SyAyyeW1mQ24ZVR+rtqZNHZ2JWnVTsPF/1iXnmmPwnpLs8mz0HRqz5adyoyt96ed/y2dsDwGBktJYyew==
+  dependencies:
+    lit-html "^0.12.0"
+
+"@polymer/polymer@^3.0.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@polymer/polymer/-/polymer-3.1.0.tgz#3e1b7447a1e350fd654e1823def655d0f0828a70"
   integrity sha512-hwN8IMERsFATz/9dSMxYHL+84J9uBkPuuarxJWlTsppZ4CAYTZKnepBfNrKoyNsafBmA3yXBiiKPPf+fJtza7A==
@@ -377,6 +384,11 @@ json3@3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/json3/-/json3-3.3.2.tgz#3c0434743df93e2f5c42aee7b19bcb483575f4e1"
   integrity sha1-PAQ0dD35Pi9cQq7nsZvLSDV19OE=
+
+lit-html@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-0.12.0.tgz#d994420fda74744f9d4a79401b086de929643e6a"
+  integrity sha512-NyFgq8yTlGEjUFQOmNnK/kj+ZdDVJzTwsLunNSewGiOns7SjuJi6ymCCqzZZ81uW2VwEmliMbOlFZc9QmOJPLA==
 
 lodash._baseassign@^3.0.0:
   version "3.2.0"

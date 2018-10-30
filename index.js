@@ -1,73 +1,74 @@
-import { html, PolymerElement } from '@polymer/polymer/polymer-element'
+import {LitElement, html} from '@polymer/lit-element';
 
-export default class MoeRecaptcha extends PolymerElement {
+export default class MoeRecaptcha extends LitElement {
 
   static get properties() {
     return {
-      version: {
-        type: Number,
-        reflectToAttribute: true
-      },
-      sitekey: {
-        type: String,
-        reflectToAttribute: true,
-        notify: true
-      },
-      container: {
-        type: Object,
-        notify: true
-      },
-      recaptchaId: String,
-      token: {
-        type: String,
-        notify: true
-      },
-      executionPromise: Object,
-      executionPromiseResolve: Function,
-      executionPromiseReject: Function,
-      loadingPromise: Object,
-      loadingPromiseResolve: Function,
-      loadingPromiseReject: Function
+      version: {type: Number},
+      sitekey: {type: String},
+      size: {type: String},
+      badge: {type: String},
+      recaptchaId: {type: Number},
+      token: {type: String},
+      executionPromise: {type: Object},
+      executionPromiseResolve: {type: Function},
+      executionPromiseReject: {type: Function},
     };
   }
 
-  static get template() {
-    return html`<style>:host{display:none;}</style>`;
+  constructor() {
+    super();
   }
 
-  ready() {
-    if (this.version !== 2 && this.version !== 3) {
-      console.error('moe-recaptcha version must be either 2 or 3');
+  updated(changedProperties) {
+    if (changedProperties.has('version') && this.version !== 2 && this.version !== 3) {
+      throw new Error('moe-recaptcha version must be either 2 or 3');
     }
   }
 
+  render() {
+    return html`
+<style>:host{display:block;}</style>
+`;
+  }
+
   /**
-   * @param sitekey
    * @returns {Promise<void>}
    */
-  load(sitekey) {
-    this.set('sitekey', sitekey);
-
+  load(container) {
     const FETCHING = `__fetchingGrecaptchaLibrary${this.version}__`;
     const CALLBACK = `__onloadGrecaptchaCallback${this.version}__`;
-    if (!window[FETCHING] && !window.grecaptcha) {
+    if (!window[FETCHING]) {
       return new Promise((resolve, reject) => {
         window[FETCHING] = true;
         window[CALLBACK] = () => {
           window[FETCHING] = false;
+
+          if (parseInt(this.version) === 2) {
+            this.recaptchaId = grecaptcha.render(container, {
+              sitekey: this.sitekey,
+              callback: this._responseCallback.bind(this),
+              'error-callback': this._errorCallback.bind(this),
+              'expired-callback': this._expiredCallback.bind(this),
+              isolated: true,
+              size: this.size,
+              badge: this.badge,
+            });
+          }
+
           resolve();
         };
 
         const script = document.createElement('script');
         const apiUrl = this.version === 2 ?
-          'https://www.google.com/recaptcha/api.js?onload=__onloadGrecaptchaCallback2__&render=explicit' :
-          `https://www.google.com/recaptcha/api.js?onload=__onloadGrecaptchaCallback3__&render=${sitekey}`;
-        script.setAttribute('async', '');
+          `//www.google.com/recaptcha/api.js?onload=${CALLBACK}&render=explicit` :
+          `//www.google.com/recaptcha/api.js?onload=${CALLBACK}&render=${this.sitekey}`;
         script.setAttribute('id', 'grecaptchaLibrary');
-        script.setAttribute('defer', '');
         script.setAttribute('src', apiUrl);
-        script.onerror = function() {
+        script.onerror = (err) => {
+          console.error(err);
           window[FETCHING] = false;
+          reject(err);
         };
         document.head.appendChild(script);
       });
@@ -76,24 +77,7 @@ export default class MoeRecaptcha extends PolymerElement {
     }
   }
 
-  render(container, size, badge) {
-    const id = grecaptcha.render(container, {
-      sitekey: this.sitekey,
-      callback: this._responseCallback.bind(this),
-      'error-callback': this._errorCallback.bind(this),
-      'expired-callback': this._expiredCallback.bind(this),
-      isolated: true,
-      size,
-      badge,
-    });
-    this.set('recaptchaId', id);
-    this.set('container', container);
-    return id;
-  }
-
-
   /**
-   *
    * @returns {Promise<String>}
    */
   execute(...args) {
@@ -104,35 +88,31 @@ export default class MoeRecaptcha extends PolymerElement {
     }
   }
 
+  reset() {
+    if (this.version === 2 && this.recaptchaId) {
+      grecaptcha.reset(this.recaptchaId);
+    }
+  }
+
   _executev2() {
     if (this.recaptchaId && grecaptcha.getResponse(this.recaptchaId)) {
       return Promise.resolve(grecaptcha.getResponse(this.recaptchaId));
     }
 
-    this.set('executionPromise', new Promise((resolve, reject) => {
-      this.set('executionPromiseResolve', resolve);
-      this.set('executionPromiseReject', reject);
-    }));
+    this.executionPromise = new Promise((resolve, reject) => {
+      this.executionPromiseResolve = resolve;
+      this.executionPromiseReject = reject;
+    });
     grecaptcha.execute(this.recaptchaId);
     return this.executionPromise;
   }
 
   _executev3(action) {
-    if (this.recaptchaId && grecaptcha.getResponse(this.recaptchaId)) {
-      return Promise.resolve(grecaptcha.getResponse(this.recaptchaId));
-    }
-
     return grecaptcha.execute(this.sitekey, {action});
   }
 
-  reset() {
-    if (this.recaptchaId) {
-      grecaptcha.reset(this.recaptchaId);
-    }
-  }
-
   _responseCallback(token) {
-    this.set('token', token);
+    this.token = token;
     this.executionPromiseResolve(token);
   }
 

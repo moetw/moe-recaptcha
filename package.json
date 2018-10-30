@@ -10,11 +10,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@polymer/polymer": "^3.1.0",
-    "@webcomponents/webcomponentsjs": "^2.1.3"
+    "@polymer/lit-element": "^0.6.2"
   },
   "devDependencies": {
     "@polymer/iron-test-helpers": "^3.0.1",
+    "@webcomponents/webcomponentsjs": "^2.1.3",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "rollup": "^0.66.6",
